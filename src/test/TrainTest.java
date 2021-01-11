@@ -50,35 +50,47 @@ public class TrainTest {
     @Test
     public void one() {
         String path = "A-B-C";
-        int result = graph.findDistOfPath(path.split("-"));
+        int result = graph.getPathDistance(path.split("-"));
         Assert.assertEquals(9, result);
     }
 
     @Test
     public void two() {
         String path = "A-D";
-        int result = graph.findDistOfPath(path.split("-"));
+        int result = graph.getPathDistance(path.split("-"));
         Assert.assertEquals(5, result);
     }
 
     @Test
     public void three() {
         String path = "A-D-C";
-        int result = graph.findDistOfPath(path.split("-"));
+        int result = graph.getPathDistance(path.split("-"));
         Assert.assertEquals(13, result);
     }
 
     @Test
     public void four() {
         String path = "A-E-B-C-D";
-        int result = graph.findDistOfPath(path.split("-"));
+        int result = graph.getPathDistance(path.split("-"));
         Assert.assertEquals(22, result);
     }
 
     @Test
     public void five() {
         String path = "A-E-D";
-        int result = graph.findDistOfPath(path.split("-"));
+        int result = graph.getPathDistance(path.split("-"));
         Assert.assertEquals(-1, result);
+    }
+
+    @Test
+    public void six() {
+        int result = graph.getPathCountByMaxStop("C", "C", 4);
+        Assert.assertEquals(2, result);
+    }
+
+    @Test
+    public void seven() {
+        int result = graph.getPathCountByMaxStop("A", "C", 4);
+        Assert.assertEquals(3, result);
     }
 }

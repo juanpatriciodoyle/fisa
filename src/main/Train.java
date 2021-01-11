@@ -1,11 +1,9 @@
 package main;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Train {
+
     /**
      * Stores the relationship of each vertex
      * */
@@ -18,8 +16,6 @@ public class Train {
      * All vertex
      * */
     private final Set<String> vertexes;
-
-
 
     /**
      * Initializes the relationship between vertices
@@ -57,7 +53,7 @@ public class Train {
      * -> if there is no path return -1
      * -> else distance of the path
      */
-    public int findDistOfPath(String[] vertexes) {
+    public int getPathDistance(String[] vertexes) {
         if (null == vertexes || vertexes.length <= 0) {
             return -1;
         }
@@ -74,6 +70,69 @@ public class Train {
             firstVertex = secondVertex;
         }
         return dist;
+    }
+
+    /**
+     * Finds the number of paths available that do not exceed the maximum number of stops in stations
+     * @param startVertex -> Origin vertex
+     * @param destinationVertex -> End vertex
+     * @param maxStop -> Maximum quantity of stops in trip
+     * @return -> Path count
+     */
+    public int getPathCountByMaxStop(String startVertex, String destinationVertex , int maxStop){
+        List<Object[]> paths = getPaths(startVertex , destinationVertex);
+        int count = 0;
+        if (paths.size() <= 0){
+            return count;
+        }
+
+        for(Object[] path : paths){
+            if (path.length <= maxStop){
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Finds all path between two vertices
+     * @param startVertex -> Origin vertex
+     * @param destinationVertex -> End vertex
+     * @return -> All paths for both vertices
+     */
+    private List<Object[]> getPaths(String startVertex, String destinationVertex){
+        Stack<String> stack = new Stack<>();
+        List<Object[]> paths = new LinkedList<>();
+        Set<String> visited = new HashSet<>(this.vertices);
+        deepFirstSearch( startVertex , destinationVertex , null, stack , paths , visited);
+        return paths;
+    }
+
+    /**
+     * Searches for traversal maps by depth first
+     * @param index -> start index
+     * @param destinationVertex -> End vertex
+     * @param prev -> Last index
+     * @param stack -> Stack for storage
+     * @param paths List of all paths
+     * @param visited -> All the sets already visited
+     */
+    private void deepFirstSearch(String index,String destinationVertex ,String prev , Stack<String> stack, List<Object[]> paths,Set<String> visited) {
+        stack.push(index);
+        if (index.equals(destinationVertex) && prev != null){
+            paths.add(stack.toArray());
+            stack.pop();
+        }else{
+            Map<String, Integer> edgeMap = adjacencyTable.get(index);
+            if (null != edgeMap && edgeMap.size() > 0) {
+                for (Map.Entry<String, Integer> entry : edgeMap.entrySet()) {
+                    if (!stack.contains(entry.getKey()) || !visited.contains(entry.getKey())){
+                        deepFirstSearch(entry.getKey(), destinationVertex , index , stack , paths , visited);
+                    }
+                }
+                visited.add(stack.pop());
+            }
+        }
     }
 
 
