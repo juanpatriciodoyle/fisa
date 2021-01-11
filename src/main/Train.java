@@ -19,6 +19,8 @@ public class Train {
      * */
     private final Set<String> vertexes;
 
+
+
     /**
      * Initializes the relationship between vertices
      * @param graph -> graph input
@@ -47,4 +49,40 @@ public class Train {
             }
         }
     }
+
+    /**
+     * Calculates the distance of the path which is composed of multiple vertices
+     * @param vertexes -> all vertex collections
+     * @return
+     * -> if there is no path return -1
+     * -> else distance of the path
+     */
+    public int findDistOfPath(String[] vertexes) {
+        if (null == vertexes || vertexes.length <= 0) {
+            return -1;
+        }
+        String firstVertex = vertexes[0];
+        int dist = 0;
+        for (int i = 1; i < vertexes.length; i++) {
+            String secondVertex = vertexes[i];
+            Map<String, Integer> edgeMap = adjacencyTable.get(firstVertex);
+            if (null != edgeMap && edgeMap.containsKey(secondVertex)) {
+                dist += edgeMap.get(secondVertex);
+            } else {
+                return -1;
+            }
+            firstVertex = secondVertex;
+        }
+        return dist;
+    }
+
+
+
+
+
+
+
+
+
+
 }
