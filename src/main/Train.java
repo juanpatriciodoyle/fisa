@@ -1,5 +1,7 @@
 package main;
 
+import main.model.Vertex;
+
 import java.util.*;
 
 public class Train {
@@ -92,6 +94,76 @@ public class Train {
             }
         }
         return count;
+    }
+
+    /**
+     * Finds the shortest distance between two vertices by Dijkstra algorithm
+     * @param startVertex -> Origin vertex
+     * @param destinationVertex -> End vertex
+     * @return
+     * -> Distance between the two vertices given
+     */
+    public int findShortestDist(String startVertex, String destinationVertex) {
+        Map<String, Vertex> parentMap = new HashMap<>(this.vertices);//store the vertex and distance closest to each vertex
+        for (String vertex : vertexes) {
+            parentMap.put(vertex, new Vertex(startVertex, Integer.MAX_VALUE));
+        }
+        parentMap.put(startVertex, null);
+        Queue<Vertex> priorityQueue = new PriorityQueue<>((Comparator) (o1, o2) -> {
+            Vertex v1 = (Vertex) o1;
+            Vertex v2 = (Vertex) o2;
+            return v1.dist - v2.dist;
+        });
+        priorityQueue.add(new Vertex(startVertex, 0));
+        Set<String> visited = new HashSet<>(this.vertices);
+        while (!priorityQueue.isEmpty()) {
+            Vertex minVertex = priorityQueue.poll();
+            if (!visited.add(minVertex.v)) {
+                continue;
+            }
+            Map<String, Integer> edgeMap = adjacencyTable.get(minVertex.v);
+            for (Map.Entry<String, Integer> entry : edgeMap.entrySet()) {
+                int dist = minVertex.dist + entry.getValue();
+                if (null != parentMap.get(entry.getKey()) &&
+                        dist < parentMap.get(entry.getKey()).dist) {//The distance from the starting vertex is smaller than the previous one. The previous vertex of the updated shortest path is the vertex just dequeued from the priority queue.
+                    parentMap.get(entry.getKey()).dist = dist;
+                    parentMap.get(entry.getKey()).v = minVertex.v;
+                }
+
+                priorityQueue.add(new Vertex(entry.getKey(), dist));
+            }
+        }
+        if (!startVertex.equals(destinationVertex)){
+            return parentMap.get(destinationVertex).dist;
+        }else{
+            return calculateDist(startVertex , parentMap);
+        }
+    }
+
+    /**
+     * Calculates the same shortest distance as the startVertex and end vertices
+     * Decomposes the problem into the distance between the starting vertex and the vertex closest to it,
+     * plus the:
+     * nearest vertex being the starting vertex of the starting vertex,
+     * the shortest distance from the starting vertex to the ending vertex
+     * @param startVertex -> Origin vertex
+     * @param parentMap -> The vertex and distance closest to each vertex
+     * @return -> Distance
+     */
+    private int calculateDist(String startVertex, Map<String, Vertex> parentMap) {
+        int dist = Integer.MAX_VALUE;
+        for (Map.Entry<String, Vertex> entry : parentMap.entrySet()) {
+            if (entry.getValue() != null
+                    && entry.getValue().v.equals(startVertex)
+                    && entry.getValue().dist < dist){
+                String next = entry.getKey();//First find the vertex closest to the target vertex
+                int curDist = entry.getValue().dist + findShortestDist(next , startVertex);
+                if (curDist < dist){
+                    dist = curDist;
+                }
+            }
+        }
+        return dist;
     }
 
     /**

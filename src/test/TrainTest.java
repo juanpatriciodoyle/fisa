@@ -10,7 +10,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Map;
 
 public class TrainTest {
 
@@ -92,5 +91,17 @@ public class TrainTest {
     public void seven() {
         int result = graph.getPathCountByMaxStop("A", "C", 4);
         Assert.assertEquals(3, result);
+    }
+
+    @Test
+    public void eight() {
+        int dist = graph.findShortestDist("A", "C");
+        Assert.assertEquals(9, dist);
+    }
+
+    @Test
+    public void nine() {
+        int dist = graph.findShortestDist("B", "B");
+        Assert.assertEquals(9, dist);
     }
 }
