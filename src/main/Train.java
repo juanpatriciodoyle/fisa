@@ -5,28 +5,34 @@ import main.model.Vertex;
 import java.util.*;
 
 public class Train {
-
     /**
      * Stores the relationship of each vertex
-     * */
+     */
     private final Map<String, Map<String, Integer>> adjacencyTable;
     /**
      * Number of vertices
-     * */
+     */
     private int vertices;
     /**
      * All vertex
-     * */
+     */
     private final Set<String> vertexes;
 
     /**
+     * Towns array network
+     */
+    private int[][] towns;
+
+
+    /**
      * Initializes the relationship between vertices
+     *
      * @param graph -> graph input
      */
     public Train(String graph) {
         vertexes = new HashSet<>();
         adjacencyTable = new HashMap<>();
-        if (null == graph || graph.length() <=0 ){
+        if (null == graph || graph.length() <= 0) {
             return;
         }
         String[] vertexLengths = graph.split(",");
@@ -49,10 +55,25 @@ public class Train {
     }
 
     /**
+     * Constructor just for the tenth task
+     */
+    public Train() {
+        vertexes = new HashSet<>();
+        adjacencyTable = new HashMap<>();
+        towns = new int[][]{
+                {0, 5, 0, 5, 7},
+                {0, 0, 4, 0, 0},
+                {0, 0, 0, 8, 2},
+                {0, 0, 8, 0, 6},
+                {0, 3, 0, 0, 0}
+        };
+    }
+
+    /**
      * Calculates the distance of the path which is composed of multiple vertices
+     *
      * @param vertexes -> all vertex collections
-     * @return
-     * -> if there is no path return -1
+     * @return -> if there is no path return -1
      * -> else distance of the path
      */
     public int getPathDistance(String[] vertexes) {
@@ -76,20 +97,21 @@ public class Train {
 
     /**
      * Finds the number of paths available that do not exceed the maximum number of stops in stations
-     * @param startVertex -> Origin vertex
+     *
+     * @param startVertex       -> Origin vertex
      * @param destinationVertex -> End vertex
-     * @param maxStop -> Maximum quantity of stops in trip
+     * @param maxStop           -> Maximum quantity of stops in trip
      * @return -> Path count
      */
-    public int getPathCountByMaxStop(String startVertex, String destinationVertex , int maxStop){
-        List<Object[]> paths = getPaths(startVertex , destinationVertex);
+    public int getPathCountByMaxStop(String startVertex, String destinationVertex, int maxStop) {
+        List<Object[]> paths = getPaths(startVertex, destinationVertex);
         int count = 0;
-        if (paths.size() <= 0){
+        if (paths.size() <= 0) {
             return count;
         }
 
-        for(Object[] path : paths){
-            if (path.length <= maxStop){
+        for (Object[] path : paths) {
+            if (path.length <= maxStop) {
                 count++;
             }
         }
@@ -98,10 +120,10 @@ public class Train {
 
     /**
      * Finds the shortest distance between two vertices by Dijkstra algorithm
-     * @param startVertex -> Origin vertex
+     *
+     * @param startVertex       -> Origin vertex
      * @param destinationVertex -> End vertex
-     * @return
-     * -> Distance between the two vertices given
+     * @return -> Distance between the two vertices given
      */
     public int findShortestDist(String startVertex, String destinationVertex) {
         Map<String, Vertex> parentMap = new HashMap<>(this.vertices);//store the vertex and distance closest to each vertex
@@ -133,11 +155,38 @@ public class Train {
                 priorityQueue.add(new Vertex(entry.getKey(), dist));
             }
         }
-        if (!startVertex.equals(destinationVertex)){
+        if (!startVertex.equals(destinationVertex)) {
             return parentMap.get(destinationVertex).dist;
-        }else{
-            return calculateDist(startVertex , parentMap);
+        } else {
+            return calculateDist(startVertex, parentMap);
         }
+    }
+
+    /**
+     * Function just for the tenth task
+     * Evaluates the number of different routes from C to C with a distances of less than 30
+     *
+     * @param startVertex       -> Origin vertex
+     * @param destinationVertex -> End vertex
+     * @param maxDistance       -> Maximum distance
+     * @param distance          -> Actual distance
+     * @param isSameCity        -> true if the Origin == End vertex
+     * @return -> Distance between the two vertices given
+     */
+    public int routeCount(int startVertex, int destinationVertex, final int maxDistance, int distance, boolean isSameCity) {
+        if (distance >= maxDistance) return 0;
+
+        int count = 0;
+        if (!isSameCity && startVertex == destinationVertex) {
+            count++;
+        }
+        for (int next = 0; next < towns.length; next++) {
+            if (towns[startVertex][next] != 0) {
+                count += routeCount(next, destinationVertex, maxDistance, distance + towns[startVertex][next], false);
+            }
+        }
+
+        return count;
     }
 
     /**
@@ -146,8 +195,9 @@ public class Train {
      * plus the:
      * nearest vertex being the starting vertex of the starting vertex,
      * the shortest distance from the starting vertex to the ending vertex
+     *
      * @param startVertex -> Origin vertex
-     * @param parentMap -> The vertex and distance closest to each vertex
+     * @param parentMap   -> The vertex and distance closest to each vertex
      * @return -> Distance
      */
     private int calculateDist(String startVertex, Map<String, Vertex> parentMap) {
@@ -155,10 +205,10 @@ public class Train {
         for (Map.Entry<String, Vertex> entry : parentMap.entrySet()) {
             if (entry.getValue() != null
                     && entry.getValue().v.equals(startVertex)
-                    && entry.getValue().dist < dist){
+                    && entry.getValue().dist < dist) {
                 String next = entry.getKey();//First find the vertex closest to the target vertex
-                int curDist = entry.getValue().dist + findShortestDist(next , startVertex);
-                if (curDist < dist){
+                int curDist = entry.getValue().dist + findShortestDist(next, startVertex);
+                if (curDist < dist) {
                     dist = curDist;
                 }
             }
@@ -168,52 +218,45 @@ public class Train {
 
     /**
      * Finds all path between two vertices
-     * @param startVertex -> Origin vertex
+     *
+     * @param startVertex       -> Origin vertex
      * @param destinationVertex -> End vertex
      * @return -> All paths for both vertices
      */
-    private List<Object[]> getPaths(String startVertex, String destinationVertex){
+    private List<Object[]> getPaths(String startVertex, String destinationVertex) {
         Stack<String> stack = new Stack<>();
         List<Object[]> paths = new LinkedList<>();
         Set<String> visited = new HashSet<>(this.vertices);
-        deepFirstSearch( startVertex , destinationVertex , null, stack , paths , visited);
+        deepFirstSearch(startVertex, destinationVertex, null, stack, paths, visited);
         return paths;
     }
 
     /**
      * Searches for traversal maps by depth first
-     * @param index -> start index
+     *
+     * @param index             -> start index
      * @param destinationVertex -> End vertex
-     * @param prev -> Last index
-     * @param stack -> Stack for storage
-     * @param paths List of all paths
-     * @param visited -> All the sets already visited
+     * @param prev              -> Last index
+     * @param stack             -> Stack for storage
+     * @param paths             List of all paths scanned
+     * @param visited           -> All the sets visited
      */
-    private void deepFirstSearch(String index,String destinationVertex ,String prev , Stack<String> stack, List<Object[]> paths,Set<String> visited) {
+    private void deepFirstSearch(String index, String destinationVertex, String prev, Stack<String> stack, List<Object[]> paths, Set<String> visited) {
         stack.push(index);
-        if (index.equals(destinationVertex) && prev != null){
+        if (index.equals(destinationVertex) && prev != null) {
             paths.add(stack.toArray());
             stack.pop();
-        }else{
+        } else {
             Map<String, Integer> edgeMap = adjacencyTable.get(index);
             if (null != edgeMap && edgeMap.size() > 0) {
                 for (Map.Entry<String, Integer> entry : edgeMap.entrySet()) {
-                    if (!stack.contains(entry.getKey()) || !visited.contains(entry.getKey())){
-                        deepFirstSearch(entry.getKey(), destinationVertex , index , stack , paths , visited);
+                    if (!stack.contains(entry.getKey()) || !visited.contains(entry.getKey())) {
+                        deepFirstSearch(entry.getKey(), destinationVertex, index, stack, paths, visited);
                     }
                 }
                 visited.add(stack.pop());
             }
         }
     }
-
-
-
-
-
-
-
-
-
 
 }
